@@ -8,10 +8,12 @@ interface AuthState {
   isLoggingIng: boolean;
   isUpdatingProfile: boolean;
   isCheckingAuth: boolean;
+  onlineUsers: any[];
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   signup: (data: IDataSignup) => Promise<void>;
   login: (data: IDataLogin) => Promise<void>;
+  updateProfile: (data: any) => Promise<void>;
 }
 export const useAuthStore = create<AuthState>((set) => ({
   authUser: null,
@@ -19,6 +21,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoggingIng: false,
   isUpdatingProfile: false,
   isCheckingAuth: true,
+  onlineUsers: [],
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("auth/check");
@@ -61,6 +64,18 @@ export const useAuthStore = create<AuthState>((set) => ({
       toast.success("Logged out successfully");
     } catch (error: any) {
       toast.error(error.response.data.message);
+    }
+  },
+  updateProfile: async (data: any) => {
+    set({ isUpdatingProfile: true });
+    try {
+      const res = await axiosInstance.put("auth/update_profile", data);
+      set({ authUser: res.data });
+      toast.success("Profile updated successfully");
+    } catch (error: any) {
+      toast.error(error.response.data.message);
+    } finally {
+      set({ isUpdatingProfile: false });
     }
   },
 }));
