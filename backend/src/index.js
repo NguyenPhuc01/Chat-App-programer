@@ -21,9 +21,7 @@ app.use(
     origin: "http://localhost:5173", // replace with your frontend URL
   })
 );
-app.get("/", (req, res) => {
-  res.send("Hello, Worl11d!");
-});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 if (process.env.NODE_ENV !== "production") {
