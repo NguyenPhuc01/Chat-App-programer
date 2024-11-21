@@ -19,7 +19,8 @@ interface AuthState {
   login: (data: IDataLogin) => Promise<void>;
   updateProfile: (data: any) => Promise<void>;
 }
-const BASE_URL = "http://localhost:8080";
+const BASE_URL =
+  import.meta.env.MODE === "development" ? "http://localhost:8080" : "/";
 export const useAuthStore = create<AuthState>((set, get) => ({
   authUser: null,
   isSigningUp: false,
