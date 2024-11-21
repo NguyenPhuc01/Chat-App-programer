@@ -61,3 +61,29 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+export const getLastMessage = async (req, res) => {
+  const { userIds } = req.body;
+
+  try {
+    const lastMessages = [];
+
+    for (let i = 0; i < userIds.length; i++) {
+      const userId = userIds[i];
+
+      const messages = await Message.find({
+        $or: [{ senderId: userId }, { receiverId: userId }],
+      })
+        .sort({ createdAt: -1 })
+        .limit(1);
+
+      if (messages.length > 0) {
+        lastMessages.push(messages[0]);
+      }
+    }
+
+    return res.status(200).json({ lastMessages });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Something went wrong." });
+  }
+};

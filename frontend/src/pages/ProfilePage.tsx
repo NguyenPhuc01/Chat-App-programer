@@ -5,7 +5,7 @@ import { useState } from "react";
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
   const [selectedImg, setSelectedImg] = useState(null);
-
+  const [fullName, setFullName] = useState(authUser?.fullName);
   const handleImageUpload = async (e: any) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -17,9 +17,12 @@ const ProfilePage = () => {
     reader.onload = async () => {
       const base64Image: any = reader.result;
       setSelectedImg(base64Image);
-      console.log("🚀 ~ reader.onload= ~ base64Image:", base64Image);
       await updateProfile({ profilePic: base64Image });
     };
+  };
+  const handleChangeProfile = async (e: any) => {
+    e.preventDefault();
+    await updateProfile({ fullName: fullName });
   };
 
   return (
@@ -74,9 +77,15 @@ const ProfilePage = () => {
                 <User className="w-4 h-4" />
                 Full Name
               </div>
-              <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
+              {/* <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
                 {authUser?.fullName}
-              </p>
+              </p> */}
+              <input
+                type="text"
+                className="px-4 py-2.5 bg-base-200 rounded-lg border w-full"
+                defaultValue={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
             </div>
 
             <div className="space-y-1.5">
@@ -102,6 +111,15 @@ const ProfilePage = () => {
                 <span className="text-green-500">Active</span>
               </div>
             </div>
+          </div>
+          <div className="flex justify-center">
+            <button
+              disabled={fullName === authUser?.fullName}
+              onClick={handleChangeProfile}
+              className="btn btn-primary w-full"
+            >
+              Update Profile
+            </button>
           </div>
         </div>
       </div>

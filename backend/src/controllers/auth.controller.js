@@ -77,18 +77,32 @@ export const logout = (req, res) => {
 };
 export const updateProfile = async (req, res) => {
   try {
-    const { profilePic } = req.body;
+    const { profilePic, fullName } = req.body;
     const userID = req.user._id;
-    if (!profilePic) {
-      return res.status(400).json({ message: "Profile picture is required" });
+    if (profilePic) {
+      const uploadResponse = await cloudinary.uploader.upload(profilePic);
+      const updatedUser = await User.findByIdAndUpdate(
+        userID,
+        { profilePic: uploadResponse.secure_url },
+        { new: true }
+      );
+      res.status(200).json(updatedUser);
     }
-    const uploadResponse = await cloudinary.uploader.upload(profilePic);
-    const updatedUser = await User.findByIdAndUpdate(
-      userID,
-      { profilePic: uploadResponse.secure_url },
-      { new: true }
-    );
-    res.status(200).json(updatedUser);
+    if (fullName) {
+      // check trùng tên
+      // const existingUser = await User.findOne({ fullName });
+      // if (existingUser && existingUser._id !== userID) {
+      //   return res
+      //     .status(400)
+      //     .json({ message: "Tên này đã tồn tại, vui lòng chọn tên khác." });
+      // }
+      const updatedUser = await User.findByIdAndUpdate(
+        userID,
+        { fullName },
+        { new: true }
+      );
+      res.status(200).json(updatedUser);
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });

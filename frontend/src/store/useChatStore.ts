@@ -16,6 +16,7 @@ interface User {
 }
 interface ChatStore {
   messages: Message[];
+  listLastMessage: Message[];
   users: User[];
   selectedUser: User | null;
   isUsersLoading: boolean;
@@ -23,12 +24,14 @@ interface ChatStore {
   getUsers: () => Promise<void>;
   getMessages: (userId: string) => Promise<void>;
   sendMessage: (data: any) => Promise<void>;
+  getLastMessage: (data: any) => Promise<void>;
   subscribeToMessage: () => void;
   unsubscribeFromMessage: () => void;
   setSelectedUser: (selectedUser: User | null) => void;
 }
 export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
+  listLastMessage: [],
   users: [],
   selectedUser: null,
   isUsersLoading: false,
@@ -48,7 +51,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ isMessageLoading: true });
     try {
       const res = await axiosInstance.get(`message/${userId}`);
-      console.log("🚀 ~ getMessages: ~ res:", res);
+      console.log("🚀 ~ getMessages: ~ :", get().messages);
+
       set({ messages: res.data });
     } catch (error: any) {
       toast.error(error.response.data.message);
@@ -63,7 +67,28 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         `message/send/${selectedUser?._id}`,
         messageData
       );
+      const updatedLastMessages = get().listLastMessage.filter(
+        (msg: any) =>
+          msg.senderId !== selectedUser?._id &&
+          msg.receiverId !== selectedUser?._id
+      );
+
+      set({
+        listLastMessage: [res.data, ...updatedLastMessages],
+      });
       set({ messages: [...messages, res.data] });
+
+      const updatedUsers = get().users.slice();
+
+      const index = updatedUsers.findIndex(
+        (user) => user._id === selectedUser?._id
+      );
+      if (index !== -1) {
+        const [user] = updatedUsers.splice(index, 1);
+        updatedUsers.unshift(user);
+      }
+
+      set({ users: updatedUsers });
     } catch (error: any) {
       toast.error(error.response.data.message);
     }
@@ -83,6 +108,21 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
   },
-
+  getLastMessage: async (data) => {
+    const listUserId: any[] = [];
+    data.forEach((element: any) => {
+      if (element._id) {
+        listUserId.push(element._id);
+      }
+    });
+    try {
+      const res = await axiosInstance.post(`message/getLastMessage`, {
+        userIds: listUserId,
+      });
+      set({ listLastMessage: res.data.lastMessages });
+    } catch (error) {
+      console.log("🚀 ~ useChatStore ~ error:", error);
+    }
+  },
   setSelectedUser: (selectedUser: any) => set({ selectedUser }),
 }));
