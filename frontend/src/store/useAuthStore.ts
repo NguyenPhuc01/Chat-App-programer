@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { IDataSignup, IUser, IDataLogin } from "./auth.type";
+import { io } from "socket.io-client";
 interface AuthState {
   authUser: IUser | null;
   isSigningUp: boolean;
@@ -9,23 +10,29 @@ interface AuthState {
   isUpdatingProfile: boolean;
   isCheckingAuth: boolean;
   onlineUsers: any[];
+  socket: any;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
+  connectSocket: () => void;
+  disconnectSocket: () => void;
   signup: (data: IDataSignup) => Promise<void>;
   login: (data: IDataLogin) => Promise<void>;
   updateProfile: (data: any) => Promise<void>;
 }
-export const useAuthStore = create<AuthState>((set) => ({
+const BASE_URL = "http://localhost:8080";
+export const useAuthStore = create<AuthState>((set, get) => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIng: false,
   isUpdatingProfile: false,
   isCheckingAuth: true,
   onlineUsers: [],
+  socket: null,
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("auth/check");
       set({ authUser: res.data });
+      get().connectSocket();
     } catch (error) {
       console.log("🚀 ~ checkAuth: ~ error:", error);
       set({ authUser: null });
@@ -51,6 +58,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const res = await axiosInstance.post("auth/login", data);
       set({ authUser: res.data });
       toast.success("Login successfully");
+      get().connectSocket();
     } catch (error: any) {
       toast.error(error.response.data.message);
     } finally {
@@ -62,6 +70,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await axiosInstance.post("auth/logout");
       set({ authUser: null });
       toast.success("Logged out successfully");
+      get().disconnectSocket();
     } catch (error: any) {
       toast.error(error.response.data.message);
     }
@@ -77,5 +86,20 @@ export const useAuthStore = create<AuthState>((set) => ({
     } finally {
       set({ isUpdatingProfile: false });
     }
+  },
+  connectSocket: () => {
+    const { authUser } = get();
+    if (!authUser || get().socket?.connected) return;
+    const socket = io(BASE_URL, {
+      query: { userId: authUser._id },
+    });
+    socket.connect();
+    set({ socket: socket });
+    socket.on("getOnlineUsers", (userId) => {
+      set({ onlineUsers: userId });
+    });
+  },
+  disconnectSocket: () => {
+    if (get().socket?.connected) get().socket?.disconnect();
   },
 }));

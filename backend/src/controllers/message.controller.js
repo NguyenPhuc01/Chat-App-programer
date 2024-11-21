@@ -1,6 +1,7 @@
 import cloudinary from "../lib/cloudinary.js";
 import { User } from "../models/user.model.js";
 import Message from "../models/message.model.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const getUserForSidebar = async (req, res) => {
   try {
@@ -35,9 +36,9 @@ export const sendMessage = async (req, res) => {
     const { text, image } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
-    let imageUrl;
+    let imageUrl = null;
     if (image) {
-      const uploadResponse = await cloudinary.uploader.upload(imageUrl);
+      const uploadResponse = await cloudinary.uploader.upload(image);
       imageUrl = uploadResponse.secure_url;
     }
     const newMessage = new Message({
@@ -46,8 +47,13 @@ export const sendMessage = async (req, res) => {
       text,
       image: imageUrl,
     });
+    console.log("🚀 ~ sendMessage ~ newMessage:", newMessage);
     await newMessage.save();
     //todo : realtime  func go  here => socket.io
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {

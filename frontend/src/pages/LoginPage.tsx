@@ -107,7 +107,7 @@ const LoginPage = () => {
                 <Loader2 className="size-5 animate-spin" />
               </>
             ) : (
-              "Create Account"
+              "Sign in"
             )}
           </button>
         </form>
