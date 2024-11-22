@@ -123,3 +123,44 @@ export const getListConversation = async (req, res) => {
       .json({ message: "Có lỗi xảy ra khi lấy danh sách cuộc trò chuyện." });
   }
 };
+export const searchUser = async (req, res) => {
+  try {
+    const { fullName } = req.params;
+    const currentUserId = req.user._id;
+
+    const searchRegex = new RegExp(fullName, "i");
+
+    const users = await User.find({
+      fullName: searchRegex,
+      _id: { $ne: currentUserId },
+    }).select("fullName profilePic");
+
+    if (users.length === 0) {
+      return res.status(200).json({ message: "No users found", users: [] });
+    }
+    const usersWithLastMessage = await Promise.all(
+      users.map(async (user) => {
+        const lastMessage = await Message.findOne({
+          $or: [
+            { senderId: currentUserId, receiverId: user._id },
+            { senderId: user._id, receiverId: currentUserId },
+          ],
+        })
+          .sort({ createdAt: -1 })
+          .lean();
+
+        return {
+          _id: user._id,
+          fullName: user.fullName,
+          profilePic: user.profilePic,
+          lastMessage: lastMessage || null,
+        };
+      })
+    );
+
+    res.status(200).json({ users: usersWithLastMessage });
+  } catch (error) {
+    console.error("Error in searchUser: ", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

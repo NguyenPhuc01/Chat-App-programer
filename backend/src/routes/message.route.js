@@ -4,11 +4,13 @@ import {
   getListConversation,
   getMessages,
   getUserForSidebar,
+  searchUser,
   sendMessage,
 } from "../controllers/message.controller.js";
 
 const router = express.Router();
 router.get("/user", protectRoute, getUserForSidebar);
+router.get("/searchUser/:fullName", protectRoute, searchUser);
 router.get("/conversation/:userId", protectRoute, getListConversation);
 router.get("/:id", protectRoute, getMessages);
 router.post("/send/:id", protectRoute, sendMessage);

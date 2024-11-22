@@ -16,13 +16,15 @@ interface User {
 }
 interface ChatStore {
   messages: Message[];
-  listLastMessage: Message[];
   users: User[];
+  users: User[];
+  resultSearchUser: User[];
   selectedUser: User | null;
   isUsersLoading: boolean;
   isMessageLoading: boolean;
   // getUsers: () => Promise<void>;
   getListConversation: () => Promise<void>;
+  searchFullnameUser: (keyword: string) => Promise<void>;
   getMessages: (userId: string) => Promise<void>;
   sendMessage: (data: any) => Promise<void>;
   // getLastMessage: (data: any) => Promise<void>;
@@ -32,8 +34,8 @@ interface ChatStore {
 }
 export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
-  listLastMessage: [],
   users: [],
+  resultSearchUser: [],
   selectedUser: null,
   isUsersLoading: false,
   isMessageLoading: false,
@@ -68,15 +70,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         `message/send/${selectedUser?._id}`,
         messageData
       );
-      const updatedLastMessages = get().listLastMessage.filter(
-        (msg: any) =>
-          msg.senderId !== selectedUser?._id &&
-          msg.receiverId !== selectedUser?._id
-      );
 
-      set({
-        listLastMessage: [res.data, ...updatedLastMessages],
-      });
       set({ messages: [...messages, res.data] });
 
       const updatedUsers = get().users.slice();
@@ -121,7 +115,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   //     const res = await axiosInstance.post(`message/getLastMessage`, {
   //       userIds: listUserId,
   //     });
-  //     set({ listLastMessage: res.data.lastMessages });
+
   //   } catch (error) {
   //     console.log("🚀 ~ useChatStore ~ error:", error);
   //   }
@@ -131,7 +125,17 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const userId = useAuthStore.getState().authUser?._id;
       const res = await axiosInstance.get(`message/conversation/${userId}`);
       set({ users: res.data });
-      console.log("🚀 ~ getListConversation:async ~ res:", res);
+    } catch (error) {
+      console.log("🚀 ~ getListConversation: ~ error:", error);
+    }
+  },
+  searchFullnameUser: async (keyword: string) => {
+    try {
+      const res = await axiosInstance.get(`message/searchUser/${keyword}`);
+      console.log("🚀 ~ searchFullnameUser: ~ res:", res);
+      if (res.status === 200) {
+        set({ resultSearchUser: res.data.users });
+      }
     } catch (error) {
       console.log("🚀 ~ getListConversation: ~ error:", error);
     }
