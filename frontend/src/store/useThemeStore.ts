@@ -1,10 +1,10 @@
 import { create } from "zustand";
 interface ThemeStore {
-  theme: string; // Giá trị của theme là chuỗi
-  setTheme: (theme: string) => void; // Hàm setTheme nhận một tham số kiểu string
+  theme: string;
+  setTheme: (theme: string) => void;
 }
 export const useThemeStore = create<ThemeStore>((set) => ({
-  theme: localStorage.getItem("chat-theme") || "coffee",
+  theme: localStorage.getItem("chat-theme") || "Dim",
   setTheme: (theme: any) => {
     localStorage.setItem("chat-theme", theme);
     set({ theme });

@@ -2,7 +2,7 @@ import cloudinary from "../lib/cloudinary.js";
 import { User } from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
-
+import mongoose from "mongoose";
 export const getUserForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
@@ -61,29 +61,65 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-export const getLastMessage = async (req, res) => {
-  const { userIds } = req.body;
+
+export const getListConversation = async (req, res) => {
+  const { userId } = req.params;
 
   try {
-    const lastMessages = [];
+    const conversations = await Message.aggregate([
+      {
+        $match: {
+          $or: [
+            { senderId: new mongoose.Types.ObjectId(userId) },
+            { receiverId: new mongoose.Types.ObjectId(userId) },
+          ],
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: {
+            $cond: {
+              if: { $eq: ["$senderId", new mongoose.Types.ObjectId(userId)] },
+              then: "$receiverId",
+              else: "$senderId",
+            },
+          },
+          lastMessage: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "userDetails",
+        },
+      },
+      {
+        $unwind: "$userDetails",
+      },
+      {
+        $project: {
+          _id: 1,
+          fullName: "$userDetails.fullName",
+          profilePic: "$userDetails.profilePic",
+          email: "$userDetails.email",
+          lastMessage: 1,
+        },
+      },
+      {
+        $sort: { "lastMessage.createdAt": -1 },
+      },
+    ]);
 
-    for (let i = 0; i < userIds.length; i++) {
-      const userId = userIds[i];
-
-      const messages = await Message.find({
-        $or: [{ senderId: userId }, { receiverId: userId }],
-      })
-        .sort({ createdAt: -1 })
-        .limit(1);
-
-      if (messages.length > 0) {
-        lastMessages.push(messages[0]);
-      }
-    }
-
-    return res.status(200).json({ lastMessages });
+    return res.status(200).json(conversations);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Something went wrong." });
+    return res
+      .status(500)
+      .json({ message: "Có lỗi xảy ra khi lấy danh sách cuộc trò chuyện." });
   }
 };

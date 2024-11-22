@@ -21,10 +21,11 @@ interface ChatStore {
   selectedUser: User | null;
   isUsersLoading: boolean;
   isMessageLoading: boolean;
-  getUsers: () => Promise<void>;
+  // getUsers: () => Promise<void>;
+  getListConversation: () => Promise<void>;
   getMessages: (userId: string) => Promise<void>;
   sendMessage: (data: any) => Promise<void>;
-  getLastMessage: (data: any) => Promise<void>;
+  // getLastMessage: (data: any) => Promise<void>;
   subscribeToMessage: () => void;
   unsubscribeFromMessage: () => void;
   setSelectedUser: (selectedUser: User | null) => void;
@@ -36,17 +37,17 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessageLoading: false,
-  getUsers: async () => {
-    set({ isUsersLoading: true });
-    try {
-      const response = await axiosInstance.get("message/user");
-      set({ users: response.data });
-    } catch (error: any) {
-      toast.error(error.response.data.message);
-    } finally {
-      set({ isUsersLoading: false });
-    }
-  },
+  // getUsers: async () => {
+  //   set({ isUsersLoading: true });
+  //   try {
+  //     const response = await axiosInstance.get("message/user");
+  //     set({ users: response.data });
+  //   } catch (error: any) {
+  //     toast.error(error.response.data.message);
+  //   } finally {
+  //     set({ isUsersLoading: false });
+  //   }
+  // },
   getMessages: async (userId) => {
     set({ isMessageLoading: true });
     try {
@@ -99,6 +100,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage: Message) => {
+      console.log("🚀 ~ socket.on ~ newMessage:", newMessage);
       if (selectedUser?._id === newMessage.senderId) {
         set({ messages: [...get().messages, newMessage] });
       }
@@ -108,20 +110,30 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
   },
-  getLastMessage: async (data) => {
-    const listUserId: any[] = [];
-    data.forEach((element: any) => {
-      if (element._id) {
-        listUserId.push(element._id);
-      }
-    });
+  // getLastMessage: async (data) => {
+  //   const listUserId: any[] = [];
+  //   data.forEach((element: any) => {
+  //     if (element._id) {
+  //       listUserId.push(element._id);
+  //     }
+  //   });
+  //   try {
+  //     const res = await axiosInstance.post(`message/getLastMessage`, {
+  //       userIds: listUserId,
+  //     });
+  //     set({ listLastMessage: res.data.lastMessages });
+  //   } catch (error) {
+  //     console.log("🚀 ~ useChatStore ~ error:", error);
+  //   }
+  // },
+  getListConversation: async () => {
     try {
-      const res = await axiosInstance.post(`message/getLastMessage`, {
-        userIds: listUserId,
-      });
-      set({ listLastMessage: res.data.lastMessages });
+      const userId = useAuthStore.getState().authUser?._id;
+      const res = await axiosInstance.get(`message/conversation/${userId}`);
+      set({ users: res.data });
+      console.log("🚀 ~ getListConversation:async ~ res:", res);
     } catch (error) {
-      console.log("🚀 ~ useChatStore ~ error:", error);
+      console.log("🚀 ~ getListConversation: ~ error:", error);
     }
   },
   setSelectedUser: (selectedUser: any) => set({ selectedUser }),

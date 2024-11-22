@@ -1,59 +1,86 @@
 import { useEffect, useMemo, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
-import { Users } from "lucide-react";
+import { Search, Users, X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 
 export const Sidebar = () => {
   const {
-    getUsers,
     users,
     selectedUser,
     setSelectedUser,
     isUsersLoading,
-    getLastMessage,
-    listLastMessage,
+    getListConversation,
   } = useChatStore();
 
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const [showInputSearch, setShowInputSearch] = useState(false);
+  const [keyword, setKeyword] = useState("");
   useEffect(() => {
-    getUsers();
-  }, [getUsers]);
-  useEffect(() => {
-    if (users.length > 0) {
-      getLastMessage(users);
-    }
-  }, [users, getLastMessage]);
-  const mergeMessagesWithUsers = (messages: any[], users: any[]) => {
-    return users.map((user: any, index) => {
-      return {
-        ...user,
-        text: messages[index]?.text,
-      };
-    });
-  };
-
-  const newData = useMemo(() => {
-    if (users.length > 0 && listLastMessage.length > 0) {
-      return mergeMessagesWithUsers(listLastMessage, users);
-    }
-    return [];
-  }, [users, listLastMessage]);
+    getListConversation();
+  }, [getListConversation]);
 
   const filteredUsers = useMemo(() => {
     return showOnlineOnly
-      ? newData.filter((user: any) => onlineUsers.includes(user._id))
-      : newData;
-  }, [showOnlineOnly, newData, onlineUsers]);
+      ? users.filter((user: any) => onlineUsers.includes(user._id))
+      : users;
+  }, [showOnlineOnly, users, onlineUsers]);
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    if (e.key === "Enter") {
+      // TODO: Search user based on keyword
+      console.log("Search user based on keyword", keyword);
+    }
+  };
+
   if (isUsersLoading) return <SidebarSkeleton />;
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
       <div className="border-b border-base-300 w-full p-5">
-        <div className="flex items-center gap-2">
-          <Users className="size-6" />
-          <span className="font-medium hidden lg:block">Contacts</span>
-        </div>
+        {showInputSearch ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              // Add your search logic here
+              console.log("Searching for:", keyword);
+            }}
+            className="relative"
+          >
+            <input
+              type="text"
+              className="w-full input input-bordered rounded-lg input-sm "
+              placeholder="Search..."
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={() => {
+                setKeyword("");
+                setShowInputSearch(false);
+              }}
+            >
+              <X className="size-4 text-gray-400 hover:text-gray-600" />
+            </button>
+          </form>
+        ) : (
+          <div className="flex justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="size-6" />
+              <span className="font-medium hidden lg:block">Contacts</span>
+            </div>
+            <Search
+              className="size-5 cursor-pointer"
+              onClick={() => {
+                setShowInputSearch(true);
+              }}
+            />
+          </div>
+        )}
+
         {/* TODO: Online filter toggle */}
         <div className="mt-3 hidden lg:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
@@ -107,8 +134,7 @@ export const Sidebar = () => {
                 <div className="font-medium truncate">{user?.fullName}</div>
 
                 <div className="text-sm text-zinc-400 overflow-hidden whitespace-nowrap text-ellipsis">
-                  {user.text}
-                  {/* {onlineUsers.includes(user._id) ? "Online" : "Offline"} */}
+                  {user.lastMessage.text}
                 </div>
               </div>
             </button>

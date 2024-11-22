@@ -1,7 +1,7 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import {
-  getLastMessage,
+  getListConversation,
   getMessages,
   getUserForSidebar,
   sendMessage,
@@ -9,8 +9,8 @@ import {
 
 const router = express.Router();
 router.get("/user", protectRoute, getUserForSidebar);
+router.get("/conversation/:userId", protectRoute, getListConversation);
 router.get("/:id", protectRoute, getMessages);
-router.post("/getLastMessage", protectRoute, getLastMessage);
 router.post("/send/:id", protectRoute, sendMessage);
 
 export default router;
