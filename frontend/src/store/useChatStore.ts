@@ -17,7 +17,6 @@ interface User {
 interface ChatStore {
   messages: Message[];
   users: User[];
-  users: User[];
   resultSearchUser: User[];
   selectedUser: User | null;
   isUsersLoading: boolean;
