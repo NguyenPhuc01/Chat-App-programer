@@ -13,7 +13,7 @@ interface User {
   _id: string;
   fullName: string;
   profilePic?: string;
-  lastMessage?: Message;
+  lastMessage: Message;
 }
 interface ChatStore {
   messages: Message[];
