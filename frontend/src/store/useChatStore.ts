@@ -13,6 +13,7 @@ interface User {
   _id: string;
   fullName: string;
   profilePic?: string;
+  lastMessage?: Message;
 }
 interface ChatStore {
   messages: Message[];
@@ -53,9 +54,17 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ isMessageLoading: true });
     try {
       const res = await axiosInstance.get(`message/${userId}`);
-      console.log("🚀 ~ getMessages: ~ :", get().messages);
 
       set({ messages: res.data });
+      const updatedUsers = get().users.map((user) =>
+        user._id === userId
+          ? {
+              ...user,
+              lastMessage: res.data[res.data.length - 1], // Cập nhật lastMessage.text
+            }
+          : user
+      );
+      set({ users: updatedUsers });
     } catch (error: any) {
       toast.error(error.response.data.message);
     } finally {
@@ -65,6 +74,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   sendMessage: async (messageData: any) => {
     const { selectedUser, messages } = get();
     try {
+      // Gửi tin nhắn đến server
       const res = await axiosInstance.post(
         `message/send/${selectedUser?._id}`,
         messageData
@@ -72,16 +82,29 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
       set({ messages: [...messages, res.data] });
 
-      const updatedUsers = get().users.slice();
+      const updatedUsers = get()
+        .users.map((user) =>
+          user._id === selectedUser?._id
+            ? {
+                ...user,
+                lastMessage: {
+                  ...(user.lastMessage || {}),
+                  text: messageData.text,
+                }, // Cập nhật lastMessage.text
+              }
+            : user
+        )
+        .slice();
 
-      const index = updatedUsers.findIndex(
+      const userIndex = updatedUsers.findIndex(
         (user) => user._id === selectedUser?._id
       );
-      if (index !== -1) {
-        const [user] = updatedUsers.splice(index, 1);
-        updatedUsers.unshift(user);
+      if (userIndex !== -1) {
+        const [selectedUserObj] = updatedUsers.splice(userIndex, 1);
+        updatedUsers.unshift(selectedUserObj);
       }
 
+      // Cập nhật trạng thái với danh sách người dùng đã thay đổi
       set({ users: updatedUsers });
     } catch (error: any) {
       toast.error(error.response.data.message);
@@ -95,6 +118,18 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     socket.on("newMessage", (newMessage: Message) => {
       console.log("🚀 ~ socket.on ~ newMessage:", newMessage);
       if (selectedUser?._id === newMessage.senderId) {
+        const updatedUsers = get().users.map((user) =>
+          user._id === newMessage.senderId
+            ? { ...user, lastMessage: newMessage }
+            : user
+        );
+        console.log("🚀 ~ socket.on ~ updatedUsers:", updatedUsers);
+
+        // Cập nhật trạng thái
+        set({
+          users: updatedUsers,
+          messages: [...get().messages, newMessage],
+        });
         set({ messages: [...get().messages, newMessage] });
       }
     });

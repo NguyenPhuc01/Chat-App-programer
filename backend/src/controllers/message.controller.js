@@ -47,7 +47,6 @@ export const sendMessage = async (req, res) => {
       text,
       image: imageUrl,
     });
-    console.log("🚀 ~ sendMessage ~ newMessage:", newMessage);
     await newMessage.save();
     //todo : realtime  func go  here => socket.io
     const receiverSocketId = getReceiverSocketId(receiverId);
