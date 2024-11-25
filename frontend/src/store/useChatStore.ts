@@ -13,6 +13,7 @@ interface User {
   _id: string;
   fullName: string;
   profilePic?: string;
+  unread?: boolean;
   lastMessage: Message;
 }
 interface ChatStore {
@@ -111,19 +112,25 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
   subscribeToMessage: () => {
-    const { selectedUser } = get();
-    if (!selectedUser) return;
+    const selectedUser = get().selectedUser;
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage: Message) => {
-      console.log("🚀 ~ socket.on ~ newMessage:", newMessage);
       if (selectedUser?._id === newMessage.senderId) {
-        const updatedUsers = get().users.map((user) =>
-          user._id === newMessage.senderId
-            ? { ...user, lastMessage: newMessage }
-            : user
-        );
-        console.log("🚀 ~ socket.on ~ updatedUsers:", updatedUsers);
+        const updatedUsers = get()
+          .users.map((user) =>
+            user._id === newMessage.senderId
+              ? { ...user, lastMessage: newMessage, unread: false }
+              : user
+          )
+          .slice();
+        // const userIndex = updatedUsers.findIndex(
+        //   (user) => user._id === selectedUser?._id
+        // );
+        // if (userIndex !== -1) {
+        //   const [selectedUserObj] = updatedUsers.splice(userIndex, 1);
+        //   updatedUsers.unshift(selectedUserObj);
+        // }
 
         // Cập nhật trạng thái
         set({
@@ -131,6 +138,26 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           messages: [...get().messages, newMessage],
         });
         set({ messages: [...get().messages, newMessage] });
+      } else {
+        const updatedUsers = get()
+          .users.map((user) => {
+            if (user._id === newMessage.senderId) {
+              return { ...user, lastMessage: newMessage, unread: true };
+            } else {
+              return user;
+            }
+          })
+          .slice();
+        const userIndex = updatedUsers.findIndex(
+          (user) => user._id === newMessage.senderId
+        );
+        if (userIndex !== -1) {
+          const [selectedUserObj] = updatedUsers.splice(userIndex, 1);
+          updatedUsers.unshift(selectedUserObj);
+        }
+        set({
+          users: updatedUsers,
+        });
       }
     });
   },
@@ -174,5 +201,17 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       console.log("🚀 ~ getListConversation: ~ error:", error);
     }
   },
-  setSelectedUser: (selectedUser: any) => set({ selectedUser }),
+  setSelectedUser: (selectedUser: any) => {
+    set({ selectedUser: selectedUser });
+    const updatedUsers = get().users.map((user) => {
+      if (user._id === selectedUser._id) {
+        return { ...user, unread: false };
+      } else {
+        return user;
+      }
+    });
+    set({
+      users: updatedUsers,
+    });
+  },
 }));

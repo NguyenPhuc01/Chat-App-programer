@@ -127,46 +127,52 @@ export const Sidebar = () => {
                     )}
                   </div>
 
-                  <div className="overflow-y-auto w-full py-3">
+                  <div className="overflow-y-auto w-full py-3 ">
                     {filteredUsers &&
                       filteredUsers.length > 0 &&
                       filteredUsers.map((user: any) => (
-                        <button
+                        <div
+                          className=" flex w-full justify-between items-center"
                           key={user._id}
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setIsDrawerOpen(false);
-                          }}
-                          className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors rounded-lg ${
-                            selectedUser?._id === user._id
-                              ? "bg-base-300 ring-1 ring-base-300"
-                              : ""
-                          }
-            `}
                         >
-                          <div className="relative  mx-0">
-                            <img
-                              src={user?.profilePic || "/avatar.png"}
-                              alt={user?.fullName}
-                              className="size-12 object-cover rounded-full max-w-none"
-                            />
-                            {onlineUsers?.includes(user._id) && (
-                              <span className="absolute bottom-0 right-0 size-3 bg-green-500  rounded-full ring-2 ring-zinc-900" />
-                            )}
-                          </div>
-
-                          <div className=" text-left min-w-0">
-                            <div className="font-medium truncate">
-                              {user?.fullName}
+                          <button
+                            onClick={() => {
+                              console.log("🚀 ~ Sidebar ~ user:", user);
+                              setSelectedUser(user);
+                              setIsDrawerOpen(false);
+                            }}
+                            className={`w-full p-3  flex items-center gap-3 hover:bg-base-300 transition-colors rounded-lg ${
+                              selectedUser?._id === user._id
+                                ? "bg-base-300 ring-1 ring-base-300"
+                                : ""
+                            }
+            `}
+                          >
+                            <div className="relative  mx-0">
+                              <img
+                                src={user?.profilePic || "/avatar.png"}
+                                alt={user?.fullName}
+                                className="size-12 object-cover rounded-full max-w-none"
+                              />
+                              {onlineUsers?.includes(user._id) && (
+                                <span className="absolute bottom-0 right-0 size-3 bg-green-500  rounded-full ring-2 ring-zinc-900" />
+                              )}
                             </div>
 
-                            <div className="text-sm text-zinc-400 overflow-hidden whitespace-nowrap text-ellipsis">
-                              {user?.lastMessage
-                                ? user?.lastMessage.text
-                                : "Chưa có tin nhắn nào"}
+                            <div className=" text-left min-w-0">
+                              <div className="font-medium truncate">
+                                {user?.fullName}
+                              </div>
+
+                              <div className="text-sm text-zinc-400 overflow-hidden whitespace-nowrap text-ellipsis">
+                                {user?.lastMessage
+                                  ? user?.lastMessage.text
+                                  : "Chưa có tin nhắn nào"}
+                              </div>
                             </div>
-                          </div>
-                        </button>
+                          </button>
+                          <div className=" mr-3 w-2.5 h-2.5 rounded-full bg-base-content"></div>
+                        </div>
                       ))}
 
                     {filteredUsers.length === 0 && (
@@ -249,41 +255,49 @@ export const Sidebar = () => {
             {filteredUsers &&
               filteredUsers.length > 0 &&
               filteredUsers.map((user: any) => (
-                <button
+                <div
                   key={user._id}
-                  onClick={() => setSelectedUser(user)}
-                  className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors rounded-lg ${
+                  className={`flex w-full justify-between items-center hover:bg-base-300 transition-colors rounded-lg ${
                     selectedUser?._id === user._id
                       ? "bg-base-300 ring-1 ring-base-300"
                       : ""
-                  }
-            `}
+                  }`}
                 >
-                  <div className="relative mx-auto sm:mx-0">
-                    <img
-                      src={user?.profilePic || "/avatar.png"}
-                      alt={user?.fullName}
-                      className="size-12 object-cover rounded-full max-w-none"
-                    />
-                    {onlineUsers?.includes(user._id) && (
-                      <span
-                        className="absolute bottom-0 right-0 size-3 bg-green-500 
-                  rounded-full ring-2 ring-zinc-900"
+                  <button
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setIsDrawerOpen(false);
+                    }}
+                    className={`w-full p-3  flex items-center gap-3  
+  `}
+                  >
+                    <div className="relative  mx-0">
+                      <img
+                        src={user?.profilePic || "/avatar.png"}
+                        alt={user?.fullName}
+                        className="size-12 object-cover rounded-full max-w-none"
                       />
-                    )}
-                  </div>
-
-                  {/* User info - only visible on larger screens */}
-                  <div className="hidden sm:block text-left min-w-0">
-                    <div className="font-medium truncate">{user?.fullName}</div>
-
-                    <div className="text-sm text-zinc-400 overflow-hidden whitespace-nowrap text-ellipsis">
-                      {user?.lastMessage
-                        ? user?.lastMessage.text
-                        : "Chưa có tin nhắn nào"}
+                      {onlineUsers?.includes(user._id) && (
+                        <span className="absolute bottom-0 right-0 size-3 bg-green-500  rounded-full ring-2 ring-zinc-900" />
+                      )}
                     </div>
-                  </div>
-                </button>
+
+                    <div className=" text-left min-w-0">
+                      <div className="font-medium truncate">
+                        {user?.fullName}
+                      </div>
+
+                      <div className="text-sm text-zinc-400 overflow-hidden whitespace-nowrap text-ellipsis">
+                        {user?.lastMessage
+                          ? user?.lastMessage.text
+                          : "Chưa có tin nhắn nào"}
+                      </div>
+                    </div>
+                  </button>
+                  {user?.unread && (
+                    <div className=" mr-3 w-2.5 h-2.5 rounded-full bg-base-content"></div>
+                  )}
+                </div>
               ))}
 
             {filteredUsers.length === 0 && (
