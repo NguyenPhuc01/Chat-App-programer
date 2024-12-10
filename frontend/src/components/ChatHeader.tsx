@@ -11,12 +11,12 @@ export const ChatHeader = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <div className="avatar">
+          <div className="">
             <div className="rounded-full relative">
               <img
                 src={selectedUser?.profilePic || "/avatar.png"}
                 alt={selectedUser?.fullName}
-                className="size-12 object-cover rounded-full max-w-none"
+                className="size-10 object-cover rounded-full max-w-none"
               />
               {onlineUsers?.includes(selectedUser?._id) && (
                 <span

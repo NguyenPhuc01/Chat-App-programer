@@ -18,7 +18,10 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:5173", // replace with your frontend URL
+    origin: [
+      "http://localhost:5173",
+      "https://chat-app-programer.onrender.com",
+    ],
   })
 );
 

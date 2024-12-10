@@ -8,6 +8,8 @@ const HomePage = () => {
   const { selectedUser, subscribeToMessage, unsubscribeFromMessage } =
     useChatStore();
   // useEffect(() => {
+  //   console.log("subbbbbbb");
+
   //   subscribeToMessage();
   //   return () => unsubscribeFromMessage();
   // }, [subscribeToMessage, unsubscribeFromMessage]);
