@@ -18,10 +18,7 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: [
-      "http://localhost:5173",
-      "https://chat-app-programer.onrender.com",
-    ],
+    origin: ["http://localhost:5173", "https://web-app-cham-cong.vercel.app"],
   })
 );
 
