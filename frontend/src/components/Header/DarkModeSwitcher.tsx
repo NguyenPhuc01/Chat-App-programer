@@ -1,6 +1,3 @@
-// import useColorMode from "../../hooks/useColorMode";
-
-import { useState } from "react";
 import { useThemeStore } from "../../store/useThemeStore";
 
 const DarkModeSwitcher = () => {
