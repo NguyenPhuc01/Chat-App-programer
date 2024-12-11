@@ -21,6 +21,7 @@ interface AuthState {
 }
 const BASE_URL =
   import.meta.env.MODE === "development" ? "http://localhost:8080" : "/";
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   authUser: null,
   isSigningUp: false,
@@ -32,6 +33,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("auth/check");
+      console.log("🚀 ~ checkAuth: ~ res:", res);
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error) {
