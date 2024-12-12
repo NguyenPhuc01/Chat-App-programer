@@ -6,7 +6,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { logout, authUser } = useAuthStore();
+  const { logout } = useAuthStore();
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
