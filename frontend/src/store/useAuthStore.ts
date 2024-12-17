@@ -32,9 +32,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   socket: null,
   checkAuth: async () => {
     try {
-      const res = await axiosInstance.get("auth/check");
-      console.log("🚀 ~ checkAuth: ~ res:", res);
-      set({ authUser: res.data });
+      const res = JSON.parse(localStorage.getItem("userData") || "");
+      set({ authUser: res });
       get().connectSocket();
     } catch (error) {
       console.log("🚀 ~ checkAuth: ~ error:", error);
@@ -59,6 +58,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoggingIng: true });
     try {
       const res = await axiosInstance.post("auth/login", data);
+      localStorage.setItem("userData", JSON.stringify(res.data));
       set({ authUser: res.data });
       toast.success("Login successfully");
       get().connectSocket();

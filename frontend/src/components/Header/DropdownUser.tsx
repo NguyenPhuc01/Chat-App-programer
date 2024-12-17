@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import UserOne from "../../image/user/user-01.png";
+import userDefault from "../../../public/avatar.png";
 import ClickOutside from "../ClickOutside";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { logout } = useAuthStore();
+  const { logout, authUser } = useAuthStore();
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
@@ -16,14 +16,20 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {authUser?.fullName}
           </span>
-          <span className="block text-xs">UX Designer</span>
+          {/* <span className="block text-xs">UX Designer</span> */}
         </span>
 
-        <span className="h-12 w-12 rounded-full">
-          <img src={UserOne} alt="User" />
-        </span>
+        <div className="avatar">
+          <div className="w-12 rounded-full">
+            <img
+              src={authUser?.profilePic || userDefault}
+              alt="User"
+              className="object-cover"
+            />
+          </div>
+        </div>
 
         <svg
           className="hidden fill-current sm:block"

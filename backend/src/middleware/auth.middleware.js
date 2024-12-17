@@ -23,3 +23,18 @@ export const protectRoute = async (req, res, next) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+export const authorizationRoute = async (req, res, next) => {
+  try {
+    const token = req.cookies.jwt;
+    jwt.verify(token, process.env.JWT_SECRET, function (err, user) {
+      if (user.isAdmin) {
+        next();
+      } else {
+        return res.status(403).json({ message: "Unauthorized - Not an admin" });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};

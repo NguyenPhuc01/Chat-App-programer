@@ -19,6 +19,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    access_token: {
+      type: String,
+      unique: true,
+    },
+    refresh_token: {
+      type: String,
+      unique: true,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
