@@ -59,7 +59,7 @@ const HomePage = () => {
     return duration.toFixed(2); // Return the duration as a string with two decimal places
   };
   return (
-    <div className="h-screen bg-base-200">
+    <div className="h-full bg-base-200">
       <div className="overflow-x-auto">
         <table className="table">
           {/* head */}

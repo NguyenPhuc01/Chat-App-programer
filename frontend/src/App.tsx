@@ -9,6 +9,7 @@ import { useThemeStore } from "./store/useThemeStore";
 import { Toaster } from "react-hot-toast";
 import DefaultLayout from "./layout/DefaultLayout";
 import { useEffect } from "react";
+import ChatPage from "./pages/ChatPage";
 const App = () => {
   const { authUser, checkAuth } = useAuthStore();
   const { theme } = useThemeStore();
@@ -55,6 +56,10 @@ const App = () => {
           <Route
             path="/profile"
             element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/chat"
+            element={authUser ? <ChatPage /> : <Navigate to="/login" />}
           />
         </Routes>
       </DefaultLayout>
