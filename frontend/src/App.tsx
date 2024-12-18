@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import DefaultLayout from "./layout/DefaultLayout";
 import { useEffect } from "react";
 import ChatPage from "./pages/ChatPage";
+import CheckInPage from "./pages/CheckInPage";
 const App = () => {
   const { authUser, checkAuth } = useAuthStore();
   const { theme } = useThemeStore();
@@ -60,6 +61,10 @@ const App = () => {
           <Route
             path="/chat"
             element={authUser ? <ChatPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/checkIn"
+            element={authUser ? <CheckInPage /> : <Navigate to="/login" />}
           />
         </Routes>
       </DefaultLayout>
