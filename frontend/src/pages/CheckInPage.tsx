@@ -87,12 +87,9 @@ const CheckInPage = () => {
       <div className="rounded-lg py-4 py-md-8 text-center text-md-left border border-solid border-gray-300 px-md-8">
         <h4 className="text-gray-700 font-bold text-xl">Thực hiện check in</h4>
 
-        {/* Show video element when scanning */}
-        {scanning && (
-          <div>
-            <video ref={videoElement} />
-          </div>
-        )}
+        <div>
+          <video ref={videoElement} />
+        </div>
 
         {/* Button to start scanning */}
         {!scanning && (
