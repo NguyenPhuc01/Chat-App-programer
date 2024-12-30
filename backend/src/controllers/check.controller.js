@@ -76,8 +76,26 @@ export const checkOut = async (req, res) => {
 export const getListCheckIn = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const data = await CheckIn.find({ userId: userId });
-    console.log("🚀 ~ getListCheckIn ~ res:", data);
+    const { month, year } = req.query;
+
+    if (!month || !year) {
+      return res.status(400).json({ message: "Month and year are required." });
+    }
+    const startDate = moment()
+      .year(year)
+      .month(month - 1)
+      .startOf("month")
+      .toDate();
+    const endDate = moment()
+      .year(year)
+      .month(month - 1)
+      .endOf("month")
+      .toDate();
+
+    const data = await CheckIn.find({
+      userId: userId,
+      date: { $gte: startDate, $lte: endDate },
+    });
     if (!data || data.length === 0) {
       return res
         .status(404)
