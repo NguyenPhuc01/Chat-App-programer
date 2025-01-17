@@ -4,11 +4,11 @@ export const generateToken = (user, res) => {
     { userId: user._id, isAdmin: user.isAdmin },
     process.env.JWT_SECRET,
     {
-      expiresIn: "7d",
+      expiresIn: "2m", //7d
     }
   );
   res.cookie("jwt", token, {
-    maxAge: 7 * 24 * 60 * 60 * 100, // MS
+    maxAge: 2 * 60 * 1000, // 7 * 24 * 60 * 60 * 100, // MS
     httpOnly: true,
     // sameSite: "strict", // only send cookies over HTTPS
     sameSite: "None", // cho phép dùng ở khác domain
